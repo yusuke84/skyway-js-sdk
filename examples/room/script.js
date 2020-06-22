@@ -11,7 +11,13 @@ const Peer = window.Peer;
   const sendTrigger = document.getElementById('js-send-trigger');
   const messages = document.getElementById('js-messages');
   const meta = document.getElementById('js-meta');
+  const gumWidth = document.getElementById('js-gum-width');
+  const gumHeight = document.getElementById('js-gum-height');
+  const gumFramerate = document.getElementById('js-gum-framerate');
+  const gumTrigger = document.getElementById('js-gum-trigger');
   const sdkSrc = document.querySelector('script[src*=skyway]');
+
+  let localStream = null;
 
   meta.innerText = `
     UA: ${navigator.userAgent}
@@ -26,24 +32,31 @@ const Peer = window.Peer;
     () => (roomMode.textContent = getRoomModeByHash())
   );
 
-  const localStream = await navigator.mediaDevices
-    .getUserMedia({
-      audio: true,
-      video: true,
-    })
-    .catch(console.error);
-
-  // Render local stream
-  localVideo.muted = true;
-  localVideo.srcObject = localStream;
-  localVideo.playsInline = true;
-  await localVideo.play().catch(console.error);
-
   // eslint-disable-next-line require-atomic-updates
   const peer = (window.peer = new Peer({
     key: window.__SKYWAY_KEY__,
     debug: 3,
   }));
+
+  // Register gum handler
+  gumTrigger.addEventListener('click', async () =>{
+    let video_constraints;
+    (gumWidth.value !== "" && gumHeight.value !== "" && gumFramerate.value !== "") ? video_constraints = 
+      {width: {exact: gumWidth.value}, height: {exact: gumHeight.value}, framerate: {exact: gumFramerate.value}} : video_constraints = "true";  
+    localStream = await navigator.mediaDevices
+    .getUserMedia({
+      audio: true,
+      video: video_constraints,
+    })
+    .catch(console.error);
+
+    // Render local stream
+    localVideo.muted = true;
+    localVideo.srcObject = localStream;
+    localVideo.playsInline = true;
+    await localVideo.play().catch(console.error);
+
+  });
 
   // Register join handler
   joinTrigger.addEventListener('click', () => {

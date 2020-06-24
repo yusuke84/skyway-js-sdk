@@ -36,6 +36,9 @@ const Peer = window.Peer;
     })
     .catch(console.error);
 
+  let _localMutedAudioStream = null;
+  let _localUnmutedAudioStream = null;
+
   // Render local stream
   localVideo.muted = true;
   localVideo.srcObject = localStream;
@@ -138,17 +141,39 @@ const Peer = window.Peer;
       //messages.textContent += `${peer.id}: ${localText.value}\n`;
       //localText.value = '';
     }
-    function onClickMute() {
+    async function onClickMute() {
       //localStream.getAudioTracks().forEach(track => track.enabled = false);
       //console.log(localStream.getAudioTracks());
-      room.replaceStream(null);
-      console.log(localStream.getAudioTracks());
+      if(_localMutedAudioStream === null){
+        _localMutedAudioStream = await navigator.mediaDevices
+        .getUserMedia({
+          audio: true,
+          video: false,
+        })
+        _localMutedAudioStream.getAudioTracks().forEach(track => track.enabled = false);
+        localStream.removeTrack(localStream.getAudioTracks()[0]);
+        localStream.addTrack(_localMutedAudioStream.getAudioTracks()[0]);
+        room.replaceStream(localStream);
+        console.log(localStream.getTracks());
+        _localUnmutedAudioStream = null;
+      }
     }
-    function onClickunMute() {
+    async function onClickunMute() {
       //localStream.getAudioTracks().forEach(track => track.enabled = true);
       //console.log(localStream.getAudioTracks());
-      room.replaceStream(localStream);
-      console.log(localStream.getAudioTracks());
+      if(_localUnmutedAudioStream === null){
+        _localUnmutedAudioStream = await navigator.mediaDevices
+        .getUserMedia({
+          audio: true,
+          video: false,
+        })
+        .catch(console.error);
+        localStream.removeTrack(_localMutedAudioStream.getAudioTracks()[0]);
+        localStream.addTrack(_localUnmutedAudioStream.getAudioTracks()[0]);
+        room.replaceStream(localStream);
+        console.log(localStream.getTracks());
+        _localMutedAudioStream = null;
+      }
     }
 
 

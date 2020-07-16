@@ -42,7 +42,7 @@ const Peer = window.Peer;
   gumTrigger.addEventListener('click', async () =>{
     let video_constraints;
     (gumWidth.value !== "" && gumHeight.value !== "" && gumFramerate.value !== "") ? video_constraints = 
-      {width: {exact: gumWidth.value}, height: {exact: gumHeight.value}, framerate: {exact: gumFramerate.value}} : video_constraints = "true";  
+      {width: {exact: gumWidth.value}, height: {exact: gumHeight.value}, frameRate: {exact: gumFramerate.value}} : video_constraints = "true";  
     localStream = await navigator.mediaDevices
     .getUserMedia({
       audio: true,

@@ -50,6 +50,11 @@ const Peer = window.Peer;
     })
     .catch(console.error);
 
+    const track = localStream.getVideoTracks()[0];
+    track.addEventListener("ended", () =>{
+      console.log("localStream was ended.");
+    });
+
     // Render local stream
     localVideo.muted = true;
     localVideo.srcObject = localStream;

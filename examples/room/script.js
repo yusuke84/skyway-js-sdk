@@ -92,15 +92,6 @@ const Peer = window.Peer;
       newVideo.setAttribute('data-peer-id', stream.peerId);
       remoteVideos.append(newVideo);
       await newVideo.play().catch(console.error);
-      room._negotiator._pc.oniceconnectionstatechange = () =>{
-        switch (peer.room._negotiator._pc.iceConnectionState) {
-          case 'failed':
-            room.close();
-            break;
-          default:
-            break;
-        }
-      }
     });
 
     room.on('data', ({ data, src }) => {

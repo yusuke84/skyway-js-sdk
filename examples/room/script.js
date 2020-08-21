@@ -66,7 +66,7 @@ const Peer = window.Peer;
       return;
     }
 
-    const room = peer.joinRoom(roomId.value, {
+    let room = peer.joinRoom(roomId.value, {
       mode: getRoomModeByHash(),
       stream: localStream,
     });

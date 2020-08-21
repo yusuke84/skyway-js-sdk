@@ -92,6 +92,16 @@ const Peer = window.Peer;
       newVideo.setAttribute('data-peer-id', stream.peerId);
       remoteVideos.append(newVideo);
       await newVideo.play().catch(console.error);
+
+      let track = stream.getVideoTracks();
+      track.onended = function(event) {
+        room.close();
+        room = peer.joinRoom(roomId.value, {
+          mode: getRoomModeByHash(),
+          stream: localStream,
+        });
+      }
+
     });
 
     room.on('data', ({ data, src }) => {

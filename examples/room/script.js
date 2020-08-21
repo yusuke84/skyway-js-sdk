@@ -134,5 +134,10 @@ const Peer = window.Peer;
     }
   });
 
-  peer.on('error', console.error);
+  peer.on('error', (err) => {
+    console.error(err);
+  });
+
+
+
 })();

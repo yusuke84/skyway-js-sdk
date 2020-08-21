@@ -136,7 +136,7 @@ const Peer = window.Peer;
         });
     
         // for closing myself
-        room.once('close', () => {
+        room.on('close', () => {
           sendTrigger.removeEventListener('click', onClickSend);
           messages.textContent += '== You left ===\n';
           Array.from(remoteVideos.children).forEach(remoteVideo => {
@@ -168,7 +168,7 @@ const Peer = window.Peer;
     });
 
     // for closing myself
-    room.once('close', () => {
+    room.on('close', () => {
       sendTrigger.removeEventListener('click', onClickSend);
       messages.textContent += '== You left ===\n';
       Array.from(remoteVideos.children).forEach(remoteVideo => {

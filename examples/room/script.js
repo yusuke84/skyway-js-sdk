@@ -75,13 +75,63 @@ const Peer = window.Peer;
       messages.textContent += '=== You joined ===\n';
 
       const track = localStream.getVideoTracks()[0];
-      track.addEventListener("ended", () =>{
+      track.addEventListener("ended", async () =>{
         console.log("localStream was ended.");
-        room.close();
+        await room.close();
+        localStream = await navigator.mediaDevices
+          .getUserMedia({
+            audio: true,
+            video: true,
+          })
+          .catch(console.error);
         room = peer.joinRoom(roomId.value, {
           mode: getRoomModeByHash(),
           stream: localStream,
         });
+
+        room.on('peerJoin', peerId => {
+          messages.textContent += `=== ${peerId} joined ===\n`;
+        });
+    
+        // Render remote stream for new peer join in the room
+        room.on('stream', async stream => {
+          const newVideo = document.createElement('video');
+          newVideo.srcObject = stream;
+          newVideo.playsInline = true;
+          // mark peerId to find it later at peerLeave event
+          newVideo.setAttribute('data-peer-id', stream.peerId);
+          remoteVideos.append(newVideo);
+          await newVideo.play().catch(console.error);
+        });
+    
+        room.on('data', ({ data, src }) => {
+          // Show a message sent to the room and who sent
+          messages.textContent += `${src}: ${data}\n`;
+        });
+    
+        // for closing room members
+        room.on('peerLeave', peerId => {
+          const remoteVideo = remoteVideos.querySelector(
+            `[data-peer-id=${peerId}]`
+          );
+          remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+          remoteVideo.srcObject = null;
+          remoteVideo.remove();
+    
+          messages.textContent += `=== ${peerId} left ===\n`;
+        });
+    
+        // for closing myself
+        room.once('close', () => {
+          sendTrigger.removeEventListener('click', onClickSend);
+          messages.textContent += '== You left ===\n';
+          Array.from(remoteVideos.children).forEach(remoteVideo => {
+            remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+            remoteVideo.srcObject = null;
+            remoteVideo.remove();
+          });
+        });
+
       });
 
     });

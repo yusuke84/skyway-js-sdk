@@ -76,6 +76,16 @@ const Peer = window.Peer;
       stream: localStream,
     });
 
+    peer.room._negotiator._pc.oniceconnectionstatechange = () =>{
+      switch (peer.room._negotiator._pc.iceConnectionState) {
+        case 'failed':
+          room.close();
+          break;
+        default:
+          break;
+      }
+    }
+
     room.once('open', () => {
       messages.textContent += '=== You joined ===\n';
     });

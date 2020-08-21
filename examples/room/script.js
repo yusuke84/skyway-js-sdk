@@ -73,8 +73,22 @@ const Peer = window.Peer;
 
     room.once('open', () => {
       messages.textContent += '=== You joined ===\n';
+    });
+    room.on('peerJoin', peerId => {
+      messages.textContent += `=== ${peerId} joined ===\n`;
+    });
 
-      const track = localStream.getVideoTracks()[0];
+    // Render remote stream for new peer join in the room
+    room.on('stream', async stream => {
+      const newVideo = document.createElement('video');
+      newVideo.srcObject = stream;
+      newVideo.playsInline = true;
+      // mark peerId to find it later at peerLeave event
+      newVideo.setAttribute('data-peer-id', stream.peerId);
+      remoteVideos.append(newVideo);
+      await newVideo.play().catch(console.error);
+
+      const track = stream.getVideoTracks()[0];
       track.addEventListener("ended", async () =>{
         console.log("localStream was ended.");
         await room.close();
@@ -133,31 +147,6 @@ const Peer = window.Peer;
         });
 
       });
-
-    });
-    room.on('peerJoin', peerId => {
-      messages.textContent += `=== ${peerId} joined ===\n`;
-    });
-
-    // Render remote stream for new peer join in the room
-    room.on('stream', async stream => {
-      const newVideo = document.createElement('video');
-      newVideo.srcObject = stream;
-      newVideo.playsInline = true;
-      // mark peerId to find it later at peerLeave event
-      newVideo.setAttribute('data-peer-id', stream.peerId);
-      remoteVideos.append(newVideo);
-      await newVideo.play().catch(console.error);
-
-      let track = stream.getVideoTracks();
-      track.onended = function(event) {
-        console.log("remote stream ended");
-        room.close();
-        room = peer.joinRoom(roomId.value, {
-          mode: getRoomModeByHash(),
-          stream: localStream,
-        });
-      }
 
     });
 

@@ -56,16 +56,6 @@ const Peer = window.Peer;
     localVideo.playsInline = true;
     await localVideo.play().catch(console.error);
 
-    const track = await localStream.getVideoTracks()[0];
-    await track.addEventListener("ended", () =>{
-      console.log("localStream was ended.");
-      room.close();
-      room = peer.joinRoom(roomId.value, {
-        mode: getRoomModeByHash(),
-        stream: localStream,
-      });
-    });
-
   });
 
   // Register join handler
@@ -83,6 +73,17 @@ const Peer = window.Peer;
 
     room.once('open', () => {
       messages.textContent += '=== You joined ===\n';
+
+      const track = localStream.getVideoTracks()[0];
+      track.addEventListener("ended", () =>{
+        console.log("localStream was ended.");
+        room.close();
+        room = peer.joinRoom(roomId.value, {
+          mode: getRoomModeByHash(),
+          stream: localStream,
+        });
+      });
+
     });
     room.on('peerJoin', peerId => {
       messages.textContent += `=== ${peerId} joined ===\n`;

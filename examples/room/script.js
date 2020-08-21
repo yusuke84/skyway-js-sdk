@@ -59,6 +59,11 @@ const Peer = window.Peer;
     const track = await localStream.getVideoTracks()[0];
     await track.addEventListener("ended", () =>{
       console.log("localStream was ended.");
+      room.close();
+      room = peer.joinRoom(roomId.value, {
+        mode: getRoomModeByHash(),
+        stream: localStream,
+      });
     });
 
   });
@@ -95,6 +100,7 @@ const Peer = window.Peer;
 
       let track = stream.getVideoTracks();
       track.onended = function(event) {
+        console.log("remote stream ended");
         room.close();
         room = peer.joinRoom(roomId.value, {
           mode: getRoomModeByHash(),
